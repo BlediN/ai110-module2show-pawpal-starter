@@ -47,11 +47,12 @@ pip install -r requirements.txt
 Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
 
 ```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+PawPal+ demo for Jordan
+Today's Schedule
+07:30 - 08:00 | Biscuit: Morning walk [high priority]
+08:00 - 08:05 | Mittens: Medication [scheduled as requested]
+08:15 - 08:25 | Biscuit: Breakfast [high priority]
+09:00 - 09:20 | Mittens: Playtime [scheduled as requested]
 ```
 
 ## 🧪 Testing PawPal+
@@ -67,28 +68,33 @@ pytest --cov
 Sample test output:
 
 ```
-# Paste your pytest output here
+============================= test session starts =============================
+collected 2 items
+
+tests/test_pawpal.py ..                                                  [100%]
+
+============================== 2 passed in 0.05s ==============================
 ```
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
+The scheduler now sorts tasks by requested time first and then by priority, while also shifting later tasks if an earlier one runs long.
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `Scheduler.build_daily_schedule()` | Orders by time, then priority, then pet/task name. |
+| Filtering | `Pet.pending_tasks()` | Completed tasks are excluded from the plan. |
+| Conflict handling | `Scheduler.build_daily_schedule()` | Overlapping tasks are pushed later to avoid collisions. |
+| Recurring tasks | `Task.is_recurring()` | Stores whether a task is once, daily, or weekly. |
 
 ## 📸 Demo Walkthrough
 
 Describe your app in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. Open the Streamlit app and review the current owner and sample pets.
+2. Add a new pet or keep the seeded demo pets.
+3. Add one or more tasks with a time, duration, priority, and frequency.
+4. Click Generate schedule to see the ordered plan for the day.
+5. Compare the schedule output with the task list to confirm the backend logic is working.
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

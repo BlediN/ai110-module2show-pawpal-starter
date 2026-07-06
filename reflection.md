@@ -4,13 +4,11 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+I designed four core classes: `Task`, `Pet`, `Owner`, and `Scheduler`. `Task` stores the care item details and completion state, `Pet` groups a pet's tasks, `Owner` manages multiple pets, and `Scheduler` turns all of the tasks into a readable daily plan.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+Yes. I added a small `ScheduleItem` value object and formatting helpers so the scheduler could return structured results instead of raw tuples. That made the demo output easier to read and kept the logic cleaner.
 
 ---
 
@@ -18,13 +16,11 @@
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+The scheduler considers task time, task priority, and whether the task is already completed. Time matters most because the tasks are daily routines, and priority is used to break ties when tasks overlap or share the same time.
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+The scheduler keeps the plan simple by shifting later tasks forward when an earlier task runs long instead of trying to solve a full optimization problem. That tradeoff is reasonable because PawPal+ is meant to help a pet owner stay organized, not solve a highly constrained enterprise scheduling problem.
 
 ---
 
@@ -32,13 +28,11 @@
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+I used AI to brainstorm the class relationships, draft the dataclass-based skeleton, and tighten the schedule formatting. The most helpful prompts were specific ones like asking how the `Scheduler` should retrieve tasks from the `Owner` and how to make the CLI output easier to read.
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+I did not accept a purely decorative UI suggestion when the backend was still missing. I verified the design by running the CLI demo and tests, and I only kept the AI suggestions that matched the actual object model and produced clear output.
 
 ---
 
@@ -46,13 +40,11 @@
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+I tested that `mark_complete()` changes a task's status and that adding a task to a pet increases the pet's task count. Those are the smallest behaviors that prove the objects are wired together correctly.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+I am moderately confident because the demo script and tests both run successfully. Next I would test longer schedules, invalid time strings, multiple tasks at the same time, and tasks that exceed the day's available window.
 
 ---
 
@@ -60,12 +52,12 @@
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+I am most satisfied that the backend now has a clear object model and a readable schedule output that can be used by both the CLI and Streamlit layers.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+I would add richer constraints such as pet-specific preferences, task recurrence by weekday, and automatic conflict warnings when too many tasks are scheduled for the same window.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+I learned that the fastest way to get a reliable AI-assisted system is to design the data model first, then validate the behavior with a small CLI demo before polishing the UI.
