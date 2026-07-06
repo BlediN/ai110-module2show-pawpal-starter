@@ -77,22 +77,27 @@ Today's Schedule
 
 ```bash
 # Run the full test suite:
-pytest
+python -m pytest
 
 # Run with coverage:
 pytest --cov
 ```
 
-Sample test output:
+These tests cover the main scheduler behaviors: task ordering, filtering by pet/status, recurring-task rollover, and exact-time conflict detection.
 
 ```
 ============================= test session starts =============================
-collected 2 items
+platform win32 -- Python 3.13.0, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\HP-B\Documents\GDrive\Computing\CodePath\AI110\Assignments\ai110-module2show-pawpal-starter
+plugins: anyio-4.14.1
+collected 6 items
 
-tests/test_pawpal.py ..                                                  [100%]
+tests\test_pawpal.py ......                                              [100%]
 
-============================== 2 passed in 0.05s ==============================
+============================== 6 passed in 0.09s ==============================
 ```
+
+Confidence Level: ★★★★☆
 
 ## 📐 Smarter Scheduling
 
