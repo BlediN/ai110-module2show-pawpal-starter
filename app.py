@@ -35,13 +35,21 @@ add_demo_data()
 owner = get_owner()
 scheduler = Scheduler()
 
+if "selected_pet_name" not in st.session_state:
+    st.session_state.selected_pet_name = owner.pets[0].name if owner.pets else ""
+if "filter_pet_name" not in st.session_state:
+    st.session_state.filter_pet_name = "All pets"
+if "filter_status" not in st.session_state:
+    st.session_state.filter_status = "All tasks"
+
 with st.expander("System overview", expanded=True):
     st.markdown(
         """
 PawPal+ keeps pet care tasks organized by:
 - storing owners, pets, and tasks as objects
 - sorting tasks by time and priority
-- shifting tasks later when earlier items run long
+- filtering by pet name and completion status
+- warning when tasks share the same start time
         """
     )
 
@@ -59,7 +67,14 @@ if st.button("Add pet"):
 
 st.subheader("Add Task")
 pet_options = [pet.name for pet in owner.pets] or [pet_name]
-selected_pet_name = st.selectbox("Assign to pet", pet_options)
+if st.session_state.selected_pet_name not in pet_options:
+    st.session_state.selected_pet_name = pet_options[0]
+
+selected_pet_name = st.selectbox(
+    "Assign to pet",
+    pet_options,
+    key="selected_pet_name",
+)
 task_description = st.text_input("Task description", value="Evening walk")
 task_time = st.text_input("Time (HH:MM)", value="18:00")
 task_duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
@@ -101,6 +116,66 @@ if task_rows:
     st.dataframe(task_rows, width="stretch", hide_index=True)
 else:
     st.info("No tasks yet.")
+
+st.subheader("Sorting and Filtering")
+filter_pet_options = ["All pets"] + [pet.name for pet in owner.pets]
+filter_status_options = ["All tasks", "Open only", "Completed only"]
+
+sort_col, filter_col = st.columns(2)
+with sort_col:
+    sorted_tasks = scheduler.sort_by_time(owner.get_all_tasks())
+    st.markdown("**Sorted tasks**")
+    if sorted_tasks:
+        st.write(
+            [
+                f"{task.time} | {task.description} ({task.frequency}, due {task.due_date.isoformat()})"
+                for task in sorted_tasks
+            ]
+        )
+    else:
+        st.info("No tasks to sort yet.")
+
+with filter_col:
+    st.session_state.filter_pet_name = st.selectbox(
+        "Filter by pet",
+        filter_pet_options,
+        index=filter_pet_options.index(st.session_state.filter_pet_name)
+        if st.session_state.filter_pet_name in filter_pet_options
+        else 0,
+    )
+    st.session_state.filter_status = st.selectbox(
+        "Filter by status",
+        filter_status_options,
+        index=filter_status_options.index(st.session_state.filter_status)
+        if st.session_state.filter_status in filter_status_options
+        else 0,
+    )
+
+    filtered_pet_name = None if st.session_state.filter_pet_name == "All pets" else st.session_state.filter_pet_name
+    filtered_completed = None
+    if st.session_state.filter_status == "Open only":
+        filtered_completed = False
+    elif st.session_state.filter_status == "Completed only":
+        filtered_completed = True
+
+    filtered_tasks = scheduler.filter_tasks(
+        owner,
+        pet_name=filtered_pet_name,
+        completed=filtered_completed,
+    )
+    st.markdown("**Filtered tasks**")
+    if filtered_tasks:
+        st.text(scheduler.format_task_list(filtered_tasks))
+    else:
+        st.info("No tasks match the selected filters.")
+
+st.subheader("Conflict Detection")
+warnings = scheduler.detect_conflicts(owner)
+if warnings:
+    for warning in warnings:
+        st.warning(warning)
+else:
+    st.success("No start-time conflicts found.")
 
 st.subheader("Today's Schedule")
 if st.button("Generate schedule"):
