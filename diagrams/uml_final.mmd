@@ -1,0 +1,63 @@
+classDiagram
+    class Task {
+        +string description
+        +string time
+        +int duration_minutes
+        +string priority
+        +string frequency
+        +date due_date
+        +bool completed
+        +mark_complete() Task
+        +mark_incomplete() None
+        +scheduled_time() time
+        +priority_rank() int
+        +is_recurring() bool
+        +next_occurrence() Task?
+        +summary() string
+    }
+
+    class Pet {
+        +string name
+        +string species
+        +int age
+        +list~Task~ tasks
+        +add_task(task) None
+        +complete_task(task) Task?
+        +task_count() int
+        +pending_tasks() list~Task~
+    }
+
+    class Owner {
+        +string name
+        +list~Pet~ pets
+        +add_pet(pet) None
+        +get_pet(pet_name) Pet?
+        +get_all_tasks() list~Task~
+        +pet_count() int
+    }
+
+    class ScheduleItem {
+        +string pet_name
+        +string task_description
+        +string planned_start
+        +string planned_end
+        +string note
+    }
+
+    class Scheduler {
+        +string workday_start
+        +string workday_end
+        +sort_by_time(tasks) list~Task~
+        +filter_tasks(owner, pet_name, completed, due_on_or_before) list~PetTask~
+        +detect_conflicts(owner) list~string~
+        +build_daily_schedule(owner) list~ScheduleItem~
+        +format_schedule(items) string
+        +format_task_list(tasks) string
+    }
+
+    Owner "1" --> "many" Pet : owns
+    Pet "1" --> "many" Task : has
+    Scheduler ..> Owner : reads
+    Scheduler ..> ScheduleItem : creates
+    Scheduler ..> Task : sorts and filters
+    Pet ..> Task : completes recurring tasks

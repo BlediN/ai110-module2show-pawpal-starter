@@ -73,6 +73,14 @@ Today's Schedule
 08:25 - 08:35 | Biscuit: Breakfast [moved later to avoid overlap with earlier tasks]
 ```
 
+## ✨ Features
+
+- Sorts pet care tasks by time, priority, and description.
+- Filters tasks by pet name, completion status, and due date.
+- Flags start-time conflicts with helpful warnings.
+- Creates the next daily or weekly task when a recurring task is completed.
+- Shows a readable daily schedule for terminal and Streamlit use.
+
 ## 🧪 Testing PawPal+
 
 ```bash
@@ -110,14 +118,53 @@ The scheduler now sorts tasks by requested time first and then by priority, filt
 | Conflict handling | `Scheduler.detect_conflicts()` | Returns warning messages for exact time matches. |
 | Recurring tasks | `Task.next_occurrence()` / `Pet.complete_task()` | Daily and weekly tasks create the next due task when completed. |
 
-## 📸 Demo Walkthrough
+## 🎬 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+PawPal+ opens in Streamlit with a simple workflow: enter or update the owner name, add pets, and create care tasks with a time, duration, priority, and frequency. The app keeps the owner and pet data in session state, so the list stays available as you add more items.
 
-1. Open the Streamlit app and review the current owner and sample pets.
-2. Add a new pet or keep the seeded demo pets.
-3. Add one or more tasks with a time, duration, priority, and frequency.
-4. Click Generate schedule to see the ordered plan for the day.
-5. Compare the schedule output with the task list to confirm the backend logic is working.
+Example workflow:
+
+1. Add a pet such as Biscuit or Mittens.
+2. Schedule tasks like a morning walk, medication, or feeding.
+3. Use the sorting panel to see tasks ordered by time.
+4. Use the filter controls to narrow the list by pet or completion status.
+5. Review conflict warnings if two tasks share the same time.
+6. Generate today's schedule to see the final ordered plan.
+
+Key Scheduler behaviors shown in the app:
+
+- Sorting by time with `Scheduler.sort_by_time()`.
+- Filtering by pet and status with `Scheduler.filter_tasks()`.
+- Conflict warnings with `Scheduler.detect_conflicts()`.
+- Recurring task rollover with `Pet.complete_task()` and `Task.next_occurrence()`.
+
+Sample CLI output from `main.py`:
+
+```
+PawPal+ demo for Jordan
+
+Sorted Tasks
+07:30 | Morning walk (daily, due 2026-07-05)
+08:00 | Medication (daily, due 2026-07-05)
+08:00 | Playtime (weekly, due 2026-07-05)
+08:15 | Breakfast (daily, due 2026-07-05)
+19:00 | Evening walk (daily, due 2026-07-05)
+19:00 | Evening walk (daily, due 2026-07-06)
+
+Filtered Tasks for Biscuit
+19:00 | Biscuit: Evening walk [done]
+07:30 | Biscuit: Morning walk [open]
+08:15 | Biscuit: Breakfast [open]
+19:00 | Biscuit: Evening walk [open]
+
+Conflict Warnings
+Warning: 2 tasks share 08:00: Mittens: Medication; Mittens: Playtime
+
+Today's Schedule
+07:30 - 08:00 | Biscuit: Morning walk [high priority]
+08:00 - 08:05 | Mittens: Medication [scheduled as requested]
+08:05 - 08:25 | Mittens: Playtime [moved later to avoid overlap with earlier tasks]
+08:25 - 08:35 | Biscuit: Breakfast [moved later to avoid overlap with earlier tasks]
+```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

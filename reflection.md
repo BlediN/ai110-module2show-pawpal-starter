@@ -34,6 +34,18 @@ I used AI to brainstorm the class relationships, draft the dataclass-based skele
 
 I did not accept a purely decorative UI suggestion when the backend was still missing. I verified the design by running the CLI demo and tests, and I only kept the AI suggestions that matched the actual object model and produced clear output.
 
+**c. AI strategy**
+
+The most effective AI features were multi-step code generation, small refactoring suggestions, and help turning vague requirements into concrete method names. I rejected suggestions that added extra complexity, such as broad optimization logic or UI flourishes that did not help the scheduler behavior.
+
+**d. Separate chat sessions**
+
+Using separate chat sessions for design, implementation, testing, and documentation kept each phase focused. It helped me avoid mixing architectural decisions with test debugging, and it made it easier to compare the final code against the original plan.
+
+**e. Lead architect takeaway**
+
+Working as the lead architect meant I had to decide when AI should generate options and when I should choose the simplest readable version. I learned that strong AI support is most useful when I keep the data model and user goals clear, then verify every major behavior with tests and a CLI demo.
+
 ---
 
 ## 4. Testing and Verification

@@ -113,7 +113,7 @@ for pet in owner.pets:
         )
 
 if task_rows:
-    st.dataframe(task_rows, width="stretch", hide_index=True)
+    st.table(task_rows)
 else:
     st.info("No tasks yet.")
 
@@ -126,9 +126,14 @@ with sort_col:
     sorted_tasks = scheduler.sort_by_time(owner.get_all_tasks())
     st.markdown("**Sorted tasks**")
     if sorted_tasks:
-        st.write(
+        st.table(
             [
-                f"{task.time} | {task.description} ({task.frequency}, due {task.due_date.isoformat()})"
+                {
+                    "time": task.time,
+                    "description": task.description,
+                    "frequency": task.frequency,
+                    "due_date": task.due_date.isoformat(),
+                }
                 for task in sorted_tasks
             ]
         )
@@ -165,7 +170,17 @@ with filter_col:
     )
     st.markdown("**Filtered tasks**")
     if filtered_tasks:
-        st.text(scheduler.format_task_list(filtered_tasks))
+        st.table(
+            [
+                {
+                    "pet": pet.name,
+                    "time": task.time,
+                    "description": task.description,
+                    "status": "done" if task.completed else "open",
+                }
+                for pet, task in filtered_tasks
+            ]
+        )
     else:
         st.info("No tasks match the selected filters.")
 
@@ -173,7 +188,7 @@ st.subheader("Conflict Detection")
 warnings = scheduler.detect_conflicts(owner)
 if warnings:
     for warning in warnings:
-        st.warning(warning)
+        st.warning(f"{warning} Check those tasks and consider moving one to a different time.")
 else:
     st.success("No start-time conflicts found.")
 
