@@ -48,11 +48,29 @@ Paste a sample of your app's CLI or Streamlit output here so a reader can see wh
 
 ```
 PawPal+ demo for Jordan
+
+Sorted Tasks
+07:30 | Morning walk (daily, due 2026-07-05)
+08:00 | Medication (daily, due 2026-07-05)
+08:00 | Playtime (weekly, due 2026-07-05)
+08:15 | Breakfast (daily, due 2026-07-05)
+19:00 | Evening walk (daily, due 2026-07-05)
+19:00 | Evening walk (daily, due 2026-07-06)
+
+Filtered Tasks for Biscuit
+19:00 | Biscuit: Evening walk [done]
+07:30 | Biscuit: Morning walk [open]
+08:15 | Biscuit: Breakfast [open]
+19:00 | Biscuit: Evening walk [open]
+
+Conflict Warnings
+Warning: 2 tasks share 08:00: Mittens: Medication; Mittens: Playtime
+
 Today's Schedule
 07:30 - 08:00 | Biscuit: Morning walk [high priority]
 08:00 - 08:05 | Mittens: Medication [scheduled as requested]
-08:15 - 08:25 | Biscuit: Breakfast [high priority]
-09:00 - 09:20 | Mittens: Playtime [scheduled as requested]
+08:05 - 08:25 | Mittens: Playtime [moved later to avoid overlap with earlier tasks]
+08:25 - 08:35 | Biscuit: Breakfast [moved later to avoid overlap with earlier tasks]
 ```
 
 ## 🧪 Testing PawPal+
@@ -78,14 +96,14 @@ tests/test_pawpal.py ..                                                  [100%]
 
 ## 📐 Smarter Scheduling
 
-The scheduler now sorts tasks by requested time first and then by priority, while also shifting later tasks if an earlier one runs long.
+The scheduler now sorts tasks by requested time first and then by priority, filters tasks by pet or completion status, creates the next occurrence for recurring tasks, and warns when tasks share the same start time.
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | `Scheduler.build_daily_schedule()` | Orders by time, then priority, then pet/task name. |
-| Filtering | `Pet.pending_tasks()` | Completed tasks are excluded from the plan. |
-| Conflict handling | `Scheduler.build_daily_schedule()` | Overlapping tasks are pushed later to avoid collisions. |
-| Recurring tasks | `Task.is_recurring()` | Stores whether a task is once, daily, or weekly. |
+| Task sorting | `Scheduler.sort_by_time()` | Sorts by `HH:MM`, then priority, then description. |
+| Filtering | `Scheduler.filter_tasks()` | Filters by pet name, completion status, and due date. |
+| Conflict handling | `Scheduler.detect_conflicts()` | Returns warning messages for exact time matches. |
+| Recurring tasks | `Task.next_occurrence()` / `Pet.complete_task()` | Daily and weekly tasks create the next due task when completed. |
 
 ## 📸 Demo Walkthrough
 

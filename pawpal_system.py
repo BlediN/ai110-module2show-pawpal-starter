@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, time
+from datetime import date, datetime, timedelta, time
 from typing import Iterable
 
 
@@ -41,12 +41,14 @@ class Task:
     duration_minutes: int
     priority: str = "medium"
     frequency: str = "once"
+    due_date: date = field(default_factory=date.today)
     completed: bool = False
 
-    def mark_complete(self) -> None:
-        """Mark the task as completed."""
+    def mark_complete(self) -> Task | None:
+        """Mark the task as completed and create the next recurring task if needed."""
 
         self.completed = True
+        return self.next_occurrence()
 
     def mark_incomplete(self) -> None:
         """Mark the task as not completed."""
@@ -68,12 +70,33 @@ class Task:
 
         return self.frequency.lower() != "once"
 
+    def next_occurrence(self) -> Task | None:
+        """Create the next task instance for daily or weekly recurring tasks."""
+
+        next_due_date: date | None = None
+        if self.frequency.lower() == "daily":
+            next_due_date = self.due_date + timedelta(days=1)
+        elif self.frequency.lower() == "weekly":
+            next_due_date = self.due_date + timedelta(days=7)
+
+        if next_due_date is None:
+            return None
+
+        return Task(
+            description=self.description,
+            time=self.time,
+            duration_minutes=self.duration_minutes,
+            priority=self.priority,
+            frequency=self.frequency,
+            due_date=next_due_date,
+        )
+
     def summary(self) -> str:
         """Return a one-line description of the task."""
 
         return (
             f"{self.time} - {self.description} ({self.duration_minutes} min, "
-            f"priority: {self.priority})"
+            f"priority: {self.priority}, due: {self.due_date.isoformat()})"
         )
 
 
@@ -88,6 +111,14 @@ class Pet:
         """Attach a task to this pet."""
 
         self.tasks.append(task)
+
+    def complete_task(self, task: Task) -> Task | None:
+        """Mark a task complete and append the next recurring occurrence if needed."""
+
+        next_task = task.mark_complete()
+        if next_task is not None:
+            self.tasks.append(next_task)
+        return next_task
 
     def task_count(self) -> int:
         """Return the number of tasks assigned to the pet."""
@@ -149,6 +180,14 @@ class Scheduler:
         self.workday_start = workday_start
         self.workday_end = workday_end
 
+    def sort_by_time(self, tasks: Iterable[Task]) -> list[Task]:
+        """Return tasks ordered by HH:MM time, then by priority and description."""
+
+        return sorted(
+            tasks,
+            key=lambda task: (task.scheduled_time(), task.priority_rank(), task.description.lower()),
+        )
+
     def _collect_pending_tasks(self, owner: Owner) -> list[tuple[Pet, Task]]:
         """Collect all unfinished tasks from the owner's pets."""
 
@@ -158,10 +197,52 @@ class Scheduler:
                 collected.append((pet, task))
         return collected
 
+    def filter_tasks(
+        self,
+        owner: Owner,
+        pet_name: str | None = None,
+        completed: bool | None = None,
+        due_on_or_before: date | None = None,
+    ) -> list[tuple[Pet, Task]]:
+        """Filter tasks by pet name and/or completion status."""
+
+        normalized_pet_name = pet_name.strip().lower() if pet_name else None
+        filtered: list[tuple[Pet, Task]] = []
+
+        for pet in owner.pets:
+            if normalized_pet_name is not None and pet.name.lower() != normalized_pet_name:
+                continue
+
+            for task in pet.tasks:
+                if completed is not None and task.completed != completed:
+                    continue
+                if due_on_or_before is not None and task.due_date > due_on_or_before:
+                    continue
+                filtered.append((pet, task))
+
+        return filtered
+
+    def detect_conflicts(self, owner: Owner) -> list[str]:
+        """Return warning messages for tasks that share the same scheduled time."""
+
+        conflicts: dict[str, list[str]] = {}
+        for pet, task in self.filter_tasks(owner, completed=False, due_on_or_before=date.today()):
+            conflicts.setdefault(task.time.strip(), []).append(f"{pet.name}: {task.description}")
+
+        warnings: list[str] = []
+        for time_text, descriptions in conflicts.items():
+            if len(descriptions) > 1:
+                warnings.append(
+                    f"Warning: {len(descriptions)} tasks share {time_text}: "
+                    + "; ".join(descriptions)
+                )
+
+        return warnings
+
     def build_daily_schedule(self, owner: Owner) -> list[ScheduleItem]:
         """Build a schedule ordered by time and priority."""
 
-        pending = self._collect_pending_tasks(owner)
+        pending = self.filter_tasks(owner, completed=False, due_on_or_before=date.today())
         pending.sort(
             key=lambda pair: (
                 pair[1].scheduled_time(),
@@ -217,4 +298,15 @@ class Scheduler:
             )
         if len(lines) == 1:
             lines.append("No tasks scheduled.")
+        return "\n".join(lines)
+
+    def format_task_list(self, tasks: Iterable[tuple[Pet, Task]]) -> str:
+        """Format a filtered task list for terminal output."""
+
+        lines = []
+        for pet, task in tasks:
+            status = "done" if task.completed else "open"
+            lines.append(f"{task.time} | {pet.name}: {task.description} [{status}]")
+        if not lines:
+            return "No matching tasks."
         return "\n".join(lines)

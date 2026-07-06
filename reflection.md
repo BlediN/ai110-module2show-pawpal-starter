@@ -20,7 +20,7 @@ The scheduler considers task time, task priority, and whether the task is alread
 
 **b. Tradeoffs**
 
-The scheduler keeps the plan simple by shifting later tasks forward when an earlier task runs long instead of trying to solve a full optimization problem. That tradeoff is reasonable because PawPal+ is meant to help a pet owner stay organized, not solve a highly constrained enterprise scheduling problem.
+The scheduler uses exact start-time matches for conflict detection instead of trying to calculate overlapping durations. That keeps the logic easy to understand and fast to explain, which is enough for a small pet-care planner even though it will miss some partial overlaps.
 
 ---
 
